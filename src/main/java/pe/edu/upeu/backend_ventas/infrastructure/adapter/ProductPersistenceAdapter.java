@@ -56,4 +56,13 @@ public class ProductPersistenceAdapter implements ProductRepositoryPort {
     public Optional<Product> fillById(Long id) {
         return productRepository.findById(id).map(productMapper::toDomainModel);
     }
+
+    @Override
+    public Optional<Product> uploadImageUrl(Long IdProduct, String imageUrl) {
+        return productRepository.findById(IdProduct)
+                .map(prod ->{
+                    prod.setImageUrl(imageUrl);
+                    return productMapper.toDomainModel(prod);
+                });
+    }
 }
