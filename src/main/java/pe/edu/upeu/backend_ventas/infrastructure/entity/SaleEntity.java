@@ -20,7 +20,7 @@ public class SaleEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL)
+     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
      private List<DetailSaleEntity> details;
 
     public SaleEntity() {
