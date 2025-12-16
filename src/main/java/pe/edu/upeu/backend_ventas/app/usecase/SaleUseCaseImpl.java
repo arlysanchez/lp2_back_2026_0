@@ -1,12 +1,14 @@
 package pe.edu.upeu.backend_ventas.app.usecase;
 
 import jakarta.transaction.Transactional;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import pe.edu.upeu.backend_ventas.domain.model.DetailSale;
 import pe.edu.upeu.backend_ventas.domain.model.Product;
 import pe.edu.upeu.backend_ventas.domain.model.Sale;
 import pe.edu.upeu.backend_ventas.domain.model.User;
 import pe.edu.upeu.backend_ventas.domain.port.in.SaleUseCase;
+import pe.edu.upeu.backend_ventas.domain.port.in.SecurityContextPort;
 import pe.edu.upeu.backend_ventas.domain.port.on.ProductRepositoryPort;
 import pe.edu.upeu.backend_ventas.domain.port.on.SaleRepositoryPort;
 
@@ -20,17 +22,22 @@ public class SaleUseCaseImpl implements SaleUseCase {
 
     private final SaleRepositoryPort saleRepositoryPort;
     private final ProductRepositoryPort productRepositoryPort;
+    private final SecurityContextPort securityContextPort;
 
-    public SaleUseCaseImpl(SaleRepositoryPort saleRepositoryPort, ProductRepositoryPort productRepositoryPort) {
+    public SaleUseCaseImpl(SaleRepositoryPort saleRepositoryPort, ProductRepositoryPort productRepositoryPort, SecurityContextPort securityContextPort) {
         this.saleRepositoryPort = saleRepositoryPort;
         this.productRepositoryPort = productRepositoryPort;
+        this.securityContextPort = securityContextPort;
     }
+
 
     @Override
     public Sale createSale(Sale sale) {
         sale.setDate(LocalDateTime.now());
+        Long currentUseId = securityContextPort.getCurrentUserId()
+                .orElseThrow(()-> new AccessDeniedException("Se requiere autenticación para crear una venta"));
         User user = new User();
-        user.setId(1L);
+        user.setId(currentUseId);
         sale.setUser(user);
         calculateSaleDetails(sale,sale.getDetails());
         return saleRepositoryPort.save(sale);
